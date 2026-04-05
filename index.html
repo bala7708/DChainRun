@@ -1,0 +1,275 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>ChainRun — Blockchain Platformer</title>
+<link rel="stylesheet" href="style.css">
+</head>
+<body>
+<div id="app">
+  <nav id="nav">
+    <div class="logo">⬛ CHAINRUN - TIME IS RUNNING ⬛</div>
+    <div class="tabs">
+      <button class="tab active" onclick="showPage('game',this)">▶ PLAY</button>
+      <button class="tab" onclick="showPage('dash',this)">📊 DASHBOARD</button>
+      <button class="tab" onclick="showPage('market',this)">🛒 MARKET</button>
+      <button class="tab" onclick="showPage('contracts',this)">⛓ CONTRACTS</button>
+    </div>
+    <div class="wallet-info">
+      <div class="dot"></div>
+      <span id="walletAddr">Not Connected</span>
+      <button class="connect-btn" onclick="connectWallet()">Connect Wallet</button>
+      <div id="chainStatus" class="chain-status">Chain: Offline</div>
+    </div>
+  </nav>
+
+  <!-- GAME PAGE -->
+  <div id="gamePage" class="page active">
+    <div id="levelSelect">
+      <div class="ls-title">SELECT LEVEL</div>
+      <div class="ls-sub">CHOOSE YOUR BATTLEFIELD · PLACE YOUR BET · COMPETE ON-CHAIN</div>
+      <div class="incubation-widget">
+        <button id="incubationIconBtn" class="incubation-icon-btn" onclick="toggleIncubationInfo()" title="Egg incubation details">🥚⏱</button>
+        <div id="incubationInfoPanel" class="incubation-info-panel hidden"></div>
+      </div>
+      <div class="levels-grid" id="levelsGrid"></div>
+      <div class="bet-section">
+        <label>MINIMUM BET (HBAR)</label>
+        <input type="number" class="bet-input" id="betAmount" value="5" min="5">
+
+        <div id="startSubscriptionCard" class="start-subscription-card"></div>
+        
+        <label style="margin-top:16px">⚔ GAME MODE</label>
+        <div class="mode-dropdown-wrapper">
+          <button class="mode-dropdown-btn" onclick="toggleModeDropdown()">
+            <span id="modeDropdownText">Normal</span>
+            <span class="dropdown-arrow">▼</span>
+          </button>
+          <div id="modeDropdown" class="mode-dropdown-menu">
+            <div class="dropdown-item" data-mode="normal" onclick="selectMode('normal')">
+              <div class="mode-icon">🎮</div>
+              <div class="mode-label">NORMAL</div>
+              <div class="mode-desc">Solo challenge</div>
+            </div>
+            <div class="dropdown-item" data-mode="instant" onclick="selectMode('instant')">
+              <div class="mode-icon">⚡</div>
+              <div class="mode-label">INSTANT</div>
+              <div class="mode-desc">Global 2-5 players</div>
+            </div>
+            <div class="dropdown-item" data-mode="weekly" onclick="selectMode('weekly')">
+              <div class="mode-icon">🏆</div>
+              <div class="mode-label">WEEKLY</div>
+              <div class="mode-desc">7-day competition</div>
+            </div>
+          </div>
+        </div>
+
+        <div id="instantChallengeLobby" class="challenge-lobby hidden">
+          <div class="lobby-title">⚡ INSTANT CHALLENGE GLOBAL LOBBY</div>
+          <div class="lobby-controls">
+            <div style="display:flex; gap:8px; margin-bottom:12px">
+              <input type="number" class="bet-input" id="instantMaxPlayers" value="3" min="2" max="5" style="width:100px" placeholder="Max players">
+              <button class="lobby-btn" onclick="createInstantChallenge()">+ CREATE ROOM</button>
+              <button class="lobby-btn" onclick="refreshChallengeLobby()">🔄 REFRESH</button>
+            </div>
+          </div>
+          <div class="challenges-list-header">
+            <div>ROOM ID</div><div>LEVEL</div><div>BET</div><div>PLAYERS</div><div>ACTION</div>
+          </div>
+          <div id="challengesList" class="challenges-list"></div>
+          <div id="noRoomsMsg" class="empty-msg">No active rooms. Create one to start!</div>
+        </div>
+
+        <div id="weeklyChallengePanel" class="challenge-lobby hidden">
+          <div class="lobby-title">🏆 WEEKLY CHAMPIONSHIP BATTLE</div>
+          <div class="weekly-info">
+            <div class="weekly-stat">
+              <div class="stat-label">CURRENT WEEK</div>
+              <div class="stat-val" id="weekNumber">Week 1</div>
+            </div>
+            <div class="weekly-stat">
+              <div class="stat-label">TIME LEFT</div>
+              <div class="stat-val" id="weekTimeLeft">--:--:--</div>
+            </div>
+            <div class="weekly-stat">
+              <div class="stat-label">TOTAL POOL</div>
+              <div class="stat-val" id="weeklyPoolTotal">⬡0</div>
+            </div>
+            <div class="weekly-stat">
+              <div class="stat-label">PARTICIPANTS</div>
+              <div class="stat-val" id="weeklyParticipants">0</div>
+            </div>
+          </div>
+          <div id="weeklyLevelBoards" class="weekly-level-boards"></div>
+          <div id="weeklyRewardInfo" class="weekly-reward-info"></div>
+          <div class="weekly-leaderboard">
+            <div id="weeklyLeaderboardHeader" class="leaderboard-header clickable" onclick="toggleWeeklyLeaderboard()">CURRENT STANDINGS ▼</div>
+            <div id="weeklyLeaderboard" class="leaderboard-list"></div>
+          </div>
+          <button class="lobby-btn" style="width:100%; margin-top:12px" onclick="joinWeeklyChallenge()">📍 JOIN WEEKLY</button>
+        </div>
+
+        <div id="poolStatus" class="pool-status">Prize Pool: ⬡0</div>
+        <br>
+        <button class="start-btn" onclick="startGame()">▶ START &amp; PLACE BET</button>
+      </div>
+    </div>
+
+    <div id="gameHud">
+      <div class="hud-item"><div class="hud-label">COINS</div><div class="hud-val" id="hudCoins">000</div></div>
+      <div class="hud-item"><div class="hud-label">EXP</div><div class="hud-val green" id="hudExp">0</div></div>
+      <div class="hud-item"><div class="hud-label">LEVEL</div><div class="hud-val" id="hudLevel">1</div></div>
+      <div class="hud-item"><div class="hud-label">TIME</div><div class="hud-val red" id="hudTime">000</div></div>
+      <div class="hud-item"><div class="hud-label">LIVES</div><div class="hud-val lives-hearts" id="hudLives">♥♥♥</div></div>
+      <div class="hud-item"><div class="hud-label">SCORE</div><div class="hud-val" id="hudScore">000000</div></div>
+      <div class="hud-item"><div class="hud-label">WORLD</div><div class="hud-val" id="hudWorld">1-1</div></div>
+    </div>
+
+    <canvas id="gameCanvas"></canvas>
+
+    <div id="powerBar">
+      <div class="pb-label">TIME REMAINING</div>
+      <div class="pb-track"><div class="pb-fill" id="pbFill" style="width:100%"></div></div>
+    </div>
+
+    <div id="keysHint">
+      <div class="keys-row"><div class="key">← →</div><div class="key-desc">move</div></div>
+      <div class="keys-row"><div class="key">SPACE/↑</div><div class="key-desc">jump</div></div>
+      <div class="keys-row"><div class="key">Z</div><div class="key-desc">fire</div></div>
+      <div class="keys-row"><div class="key">SHIFT</div><div class="key-desc">run</div></div>
+    </div>
+
+    <div id="gameOverlay">
+      <div class="ov-title" id="ovTitle">LEVEL CLEAR!</div>
+      <div class="ov-score" id="ovScore">COINS: 0 | EXP GAINED: 0</div>
+      <div class="ov-time" id="ovTime">TIME: 00:00</div>
+      <div id="instantScoreboard" class="scoreboard hidden">
+        <div class="scoreboard-title">⚡ INSTANT MATCH RESULTS</div>
+        <div id="instantScores" class="scores-list"></div>
+      </div>
+      <div id="weeklyScoreboard" class="scoreboard hidden">
+        <div class="scoreboard-title">🏆 WEEKLY LEADERBOARD</div>
+        <div id="weeklyScores" class="scores-list"></div>
+      </div>
+      <div class="ov-btns">
+        <button class="ov-btn" onclick="backToLevels()">◀ LEVELS</button>
+        <button class="ov-btn primary" onclick="submitScore()">⛓ SUBMIT SCORE</button>
+        <button class="ov-btn" onclick="retryLevel()">↺ RETRY</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- DASHBOARD PAGE -->
+  <div id="dashPage" class="page">
+    <div class="dash-grid">
+      <div class="stat-card gold">
+        <div class="stat-label">Total Prize Pool</div>
+        <div class="stat-val">⬡ 12,847</div>
+        <div class="stat-sub">HBAR locked in contract</div>
+      </div>
+      <div class="stat-card green">
+        <div class="stat-label">Active Players</div>
+        <div class="stat-val">1,293</div>
+        <div class="stat-sub">247 playing right now</div>
+      </div>
+      <div class="stat-card blue">
+        <div class="stat-label">Levels Completed Today</div>
+        <div class="stat-val">8,491</div>
+        <div class="stat-sub">+32% from yesterday</div>
+      </div>
+    </div>
+    <div class="leaderboard">
+      <div class="lb-title">🏆 Global Leaderboard</div>
+      <div class="lb-row header">
+        <div>#</div><div>Player</div><div>EXP</div><div>Best Time</div><div>Level</div><div>Prize Won</div>
+      </div>
+      <div id="leaderboardBody"></div>
+    </div>
+    <div class="live-section">
+      <div class="live-title"><span class="live-badge">LIVE</span> Currently Playing</div>
+      <div class="live-grid" id="liveGrid"></div>
+    </div>
+  </div>
+
+  <div id="marketPage" class="page">
+    <div class="market-tabs">
+      <button id="marketFeedTab" class="market-tab active" onclick="setMarketViewTab('feed')">MARKET FEED</button>
+      <button id="marketTradeTab" class="market-tab" onclick="setMarketViewTab('trade')">TRADE</button>
+    </div>
+    <div class="market-layout">
+      <div class="market-panel market-feed-panel" id="marketFeedPanel">
+        <div class="market-title">🛒 Material Market</div>
+        <div class="market-sub">Trade minted materials, track rarity, and collect for NFT crafting.</div>
+        <div id="marketListings" class="market-listings"></div>
+      </div>
+      <div class="market-panel market-feed-panel" id="marketInventoryPanel">
+        <div class="market-title">🎒 Your Inventory</div>
+        <div id="marketInventory" class="market-inventory"></div>
+      </div>
+      <div class="market-panel market-feed-panel" id="marketNftPanel">
+        <div class="market-title">🧩 NFT Forge</div>
+        <div id="nftProgress" class="nft-progress"></div>
+        <button class="lobby-btn" style="margin-top:12px;width:100%" onclick="craftWeeklyNft()">MINT COLLECTOR NFT</button>
+      </div>
+      <div class="market-panel trade-panel hidden" id="marketTradePanel">
+        <div class="market-title">🔁 Super Rare Trade Desk</div>
+        <div class="market-sub">Convert 1 super rare item into bundles and settle trade fee using your connected wallet.</div>
+        <div id="marketTradeStatus" class="trade-status">Connect wallet and choose a trade route.</div>
+        <div id="marketTradeRoutes" class="trade-routes"></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- CONTRACTS PAGE -->
+  <div id="contractsPage" class="page">
+    <div class="contract-header">
+      <div class="contract-title">⛓ SMART CONTRACTS</div>
+      <div class="contract-sub">Deployed on Hedera EVM for gameplay, subscriptions, verification, and rewards</div>
+    </div>
+    <div class="contracts-grid">
+      <div class="contract-card">
+        <div class="cc-name">DaveChainGame.sol</div>
+        <div class="cc-addr">contracts/DaveChainGame.sol</div>
+        <div class="cc-desc">Main game contract. Handles betting pools, level completion verification, prize distribution (95% winner / 5% fee), and EXP token minting.</div>
+        <div class="cc-chain"><span class="chain-badge chain-evm">⬡ EVM</span></div>
+      </div>
+      <div class="contract-card">
+        <div class="cc-name">DaveAIOracle.sol</div>
+        <div class="cc-addr">contracts/DaveAIOracle.sol</div>
+        <div class="cc-desc">Hedera oracle contract that verifies completion times, detects cheating via cryptographic proof-of-play, and calculates fairness scores.</div>
+        <div class="cc-chain"><span class="chain-badge chain-evm">⬡ HEDERA EVM</span></div>
+      </div>
+      <div class="contract-card">
+        <div class="cc-name">ExpToken.sol</div>
+        <div class="cc-addr">contracts/ExpToken.sol</div>
+        <div class="cc-desc">ERC-20 EXP token. Coins collected in-game mint EXP. EXP determines player rank, level unlock, and governance voting power.</div>
+        <div class="cc-chain"><span class="chain-badge chain-evm">⬡ EVM TOKEN</span></div>
+      </div>
+      <div class="contract-card">
+        <div class="cc-name">LevelRegistry.sol</div>
+        <div class="cc-addr">contracts/LevelRegistry.sol</div>
+        <div class="cc-desc">Stores all 10 level configurations for decentralized gameplay on the connected Hedera EVM stack.</div>
+        <div class="cc-chain"><span class="chain-badge chain-evm">⬡ HEDERA EVM</span></div>
+      </div>
+    </div>
+    <div class="full-contract">
+      <div class="fc-title">Deployment Info <a href="../contracts/DaveChainGame.sol" class="copy-btn" download>Download All Contracts</a></div>
+      <div class="code-block">
+        See the <code>contracts/</code> folder for all Solidity source files.<br>
+        See <code>scripts/deploy.js</code> for Hardhat deployment script.<br>
+        See <code>agent/oracle_agent.js</code> for Hedera oracle service.<br><br>
+        Run: <code>npm install &amp;&amp; npm run deploy:evm</code>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script src="adaptive_ai_agent.js"></script>
+<script src="game.js"></script>
+<script src="dashboard.js"></script>
+<script src="https://unpkg.com/@walletconnect/ethereum-provider@2.17.1/dist/index.umd.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/ethers@5.7.2/dist/ethers.umd.min.js"></script>
+<script src="wallet.js"></script>
+</body>
+</html>
