@@ -1,0 +1,27 @@
+{
+  "name": "chainrun",
+  "version": "1.0.0",
+  "description": "ChainRun - blockchain platformer on Hedera EVM with WalletConnect",
+  "scripts": {
+    "install:all": "npm install && npm --prefix agent install",
+    "clean": "npx hardhat clean",
+    "compile": "npx hardhat compile",
+    "test": "npx hardhat test",
+    "deploy:evm": "npx hardhat run scripts/deploy.js --network hedera_testnet",
+    "deploy:hedera": "npm run deploy:evm",
+    "deploy:local": "npx hardhat run scripts/deploy.js --network localhost",
+    "agent": "node agent/oracle_agent.js",
+    "node": "npx hardhat node",
+    "serve": "npx serve -s frontend -p 4000 --no-clipboard"
+  },
+  "devDependencies": {
+    "@nomicfoundation/hardhat-toolbox": "^4.0.0",
+    "@openzeppelin/contracts": "^5.0.0",
+    "hardhat": "^2.22.0",
+    "serve": "^14.0.0"
+  },
+  "dependencies": {
+    "dotenv": "^16.0.0",
+    "ethers": "^6.10.0"
+  }
+}

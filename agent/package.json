@@ -1,0 +1,16 @@
+{
+  "name": "chainrun-agent",
+  "version": "1.0.0",
+  "description": "Hedera Oracle Agent for ChainRun",
+  "main": "oracle_agent.js",
+  "scripts": {
+    "start": "node oracle_agent.js",
+    "dev":   "nodemon oracle_agent.js"
+  },
+  "dependencies": {
+    "cors":   "^2.8.5",
+    "dotenv": "^16.0.0",
+    "ethers": "^5.7.2",
+    "express":"^4.18.0"
+  }
+}

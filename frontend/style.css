@@ -1,0 +1,307 @@
+@import url('https://fonts.googleapis.com/css2?family=Press+Start+2P&family=Orbitron:wght@400;700;900&display=swap');
+
+*{margin:0;padding:0;box-sizing:border-box}
+:root{
+  --pixel:#FFD700;--bg:#0a0a1a;--panel:#111128;--border:#2a2a5a;
+  --red:#ff3366;--green:#00ff88;--blue:#3399ff;--purple:#aa44ff;
+  --orange:#ff8800;--cyan:#00ffff;--white:#ffffff;
+  --muted:#8888aa;--card:#1a1a3a;--accent:#FFD700;
+}
+body{background:var(--bg);color:var(--white);font-family:'Orbitron',monospace;overflow:hidden;height:100vh}
+#app{display:grid;grid-template-rows:50px 1fr;height:100vh}
+
+/* NAV */
+#nav{background:var(--panel);border-bottom:2px solid var(--pixel);display:grid;grid-template-columns:1fr auto 1fr;align-items:center;padding:0 16px;z-index:100}
+#nav .logo{font-family:'Press Start 2P',monospace;font-size:11px;color:var(--pixel);letter-spacing:1px}
+#nav .logo{justify-self:start}
+#nav .tabs{display:flex;gap:4px;justify-self:center}
+.tab{background:none;border:1px solid var(--border);color:var(--muted);padding:6px 14px;font-family:'Orbitron',monospace;font-size:10px;cursor:pointer;border-radius:4px;transition:all 0.2s}
+.tab.active,.tab:hover{background:var(--pixel);color:#000;border-color:var(--pixel)}
+#nav .wallet-info{font-size:10px;color:var(--green);display:flex;align-items:center;gap:8px;justify-self:end}
+.chain-status{font-size:9px;color:var(--cyan);border:1px solid var(--cyan);padding:4px 8px;border-radius:4px;white-space:nowrap}
+.dot{width:8px;height:8px;border-radius:50%;background:var(--green);animation:pulse 2s infinite}
+.connect-btn{background:none;border:1px solid var(--cyan);color:var(--cyan);padding:4px 10px;font-family:'Orbitron',monospace;font-size:9px;cursor:pointer;border-radius:4px}
+.connect-btn:hover{background:var(--cyan);color:#000}
+.demo-btn{border-color:var(--yellow,#f5c518);color:var(--yellow,#f5c518)}
+.demo-btn:hover{background:var(--yellow,#f5c518);color:#000}
+@keyframes pulse{0%,100%{opacity:1}50%{opacity:0.3}}
+
+.page{display:none;height:calc(100vh - 50px);overflow:auto}
+.page.active{display:block}
+
+/* LEVEL SELECT */
+#gamePage{position:relative;overflow:hidden}
+#gameContainer{position:relative;width:100%;height:100%}
+#levelSelect{position:absolute;inset:0;background:rgba(0,0,0,0.95);display:flex;flex-direction:column;align-items:center;justify-content:center;z-index:50;overflow-y:auto;padding:20px 0}
+.ls-title{font-family:'Press Start 2P',monospace;font-size:18px;color:var(--pixel);margin-bottom:8px;text-shadow:0 0 20px var(--pixel)}
+.ls-sub{font-family:'Press Start 2P',monospace;font-size:7px;color:var(--muted);margin-bottom:28px;text-align:center}
+.incubation-widget{position:absolute;top:14px;right:16px;margin-bottom:0;z-index:220}
+.incubation-icon-btn{width:38px;height:38px;border-radius:10px;border:1px solid #f5ca57;background:linear-gradient(160deg,#1e253f,#0f1730);color:#ffd56f;cursor:pointer;font-size:17px;display:flex;align-items:center;justify-content:center;transition:all 0.2s;box-shadow:0 4px 16px rgba(0,0,0,0.35)}
+.incubation-icon-btn:hover{transform:translateY(-1px);box-shadow:0 8px 20px rgba(245,202,87,0.25)}
+.incubation-info-panel{position:absolute;top:46px;right:0;left:auto;transform:none;width:320px;max-width:90vw;background:rgba(10,18,34,0.96);border:1px solid #f5ca57;border-radius:10px;padding:11px;z-index:230;font-size:9px;box-shadow:0 10px 28px rgba(0,0,0,0.45)}
+.incubation-info-panel.hidden{display:none}
+.incub-title{font-family:'Press Start 2P',monospace;font-size:8px;color:var(--pixel);margin-bottom:6px}
+.incub-meta{color:var(--muted);margin-bottom:8px}
+.incub-row{display:grid;grid-template-columns:72px 52px 1fr;gap:8px;align-items:center;padding:4px 0;border-bottom:1px dashed rgba(255,255,255,0.1)}
+.incub-row:last-child{border-bottom:none}
+.incub-tier{font-weight:700}
+.incub-prob{color:var(--cyan);text-align:right}
+.incub-items{color:var(--white);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+@media (max-width:768px){
+  .incubation-widget{top:10px;right:10px}
+  .incubation-info-panel{width:min(300px,calc(100vw - 22px))}
+}
+.levels-grid{display:grid;grid-template-columns:repeat(5,1fr);gap:12px;max-width:700px;width:100%;padding:0 20px}
+.level-card{border:2px solid var(--border);border-radius:8px;padding:12px 8px;cursor:pointer;text-align:center;transition:all 0.2s;position:relative;overflow:hidden}
+.level-card:hover{transform:scale(1.05)}
+.level-card .lnum{font-family:'Press Start 2P',monospace;font-size:14px;margin-bottom:4px}
+.level-card .lname{font-size:8px;color:var(--muted);margin-bottom:6px;font-family:'Press Start 2P',monospace;line-height:1.4}
+.level-card .ldiff{font-size:7px;padding:2px 6px;border-radius:3px;display:inline-block}
+.level-card .lbet{font-size:9px;color:var(--pixel);margin-top:6px}
+.level-card .legg{font-size:7px;color:var(--cyan);margin-top:5px;line-height:1.4}
+.diff-easy{background:#00ff8822;color:var(--green);border:1px solid var(--green)}
+.diff-med{background:#ff880022;color:var(--orange);border:1px solid var(--orange)}
+.diff-hard{background:#ff336622;color:var(--red);border:1px solid var(--red)}
+.diff-super{background:#aa44ff22;color:var(--purple);border:1px solid var(--purple)}
+.bet-section{margin-top:20px;text-align:center}
+.bet-section label{font-size:9px;color:var(--muted);display:block;margin-bottom:8px;font-family:'Press Start 2P',monospace;margin-top:12px}
+.bet-input{background:var(--card);border:2px solid var(--border);color:var(--pixel);padding:8px 16px;font-family:'Orbitron',monospace;font-size:14px;border-radius:6px;width:180px;text-align:center}
+.bet-input:focus{outline:none;border-color:var(--pixel)}
+.start-subscription-card{margin:14px auto 10px;max-width:360px;background:linear-gradient(165deg,#16162f,#0e0e23);border:1px solid #384067;border-radius:10px;padding:12px 14px;text-align:left;box-shadow:0 6px 24px rgba(0,0,0,0.28)}
+.start-subscription-card .ssc-title{font-family:'Press Start 2P',monospace;font-size:8px;color:var(--pixel);margin-bottom:7px}
+.start-subscription-card .ssc-plan{font-size:9px;color:var(--cyan);margin-bottom:6px}
+.start-subscription-card .ssc-benefits{font-size:9px;color:var(--muted);line-height:1.5;margin-bottom:9px}
+.start-subscription-card .ssc-action{display:flex;justify-content:space-between;align-items:center;gap:8px}
+.start-subscription-card .ssc-fee{font-size:9px;color:var(--green);font-family:'Press Start 2P',monospace}
+.start-subscription-card .ssc-buttons{display:flex;gap:6px;flex-wrap:wrap;justify-content:flex-end}
+.start-subscription-card .ssc-btn{background:var(--pixel);color:#000;border:none;border-radius:6px;padding:7px 11px;font-family:'Press Start 2P',monospace;font-size:8px;cursor:pointer}
+.start-subscription-card .ssc-trial-btn{background:#67e8f9;color:#02141a}
+.start-subscription-card .ssc-btn:disabled{opacity:0.45;cursor:not-allowed}
+.start-subscription-card .ssc-btn:hover:not(:disabled){filter:brightness(1.06)}
+
+/* Mode Dropdown */
+.mode-dropdown-wrapper{position:relative;margin:12px auto;width:fit-content}
+.mode-dropdown-btn{background:var(--card);border:2px solid var(--border);color:var(--pixel);padding:10px 20px;font-family:'Press Start 2P',monospace;font-size:10px;cursor:pointer;border-radius:6px;display:flex;align-items:center;gap:8px;transition:all 0.2s;width:220px;justify-content:space-between}
+.mode-dropdown-btn:hover{border-color:var(--pixel);box-shadow:0 0 15px var(--pixel)80}
+.dropdown-arrow{display:inline-block;transition:transform 0.3s}
+.mode-dropdown-wrapper.active .dropdown-arrow{transform:rotate(180deg)}
+.mode-dropdown-menu{position:absolute;top:100%;left:0;right:0;background:var(--panel);border:2px solid var(--pixel);border-radius:6px;z-index:1000;display:none;overflow:hidden;margin-top:-2px;animation:slideDown 0.3s ease-out}
+.mode-dropdown-wrapper.active .mode-dropdown-menu{display:grid}
+@keyframes slideDown{from{opacity:0;transform:translateY(-10px)}to{opacity:1;transform:translateY(0)}}
+.dropdown-item{padding:12px;border:1px solid var(--border);cursor:pointer;transition:all 0.2s;display:flex;flex-direction:column;align-items:center;gap:4px;background:var(--card)}
+.dropdown-item:hover{background:rgba(255,215,0,0.1);border-color:var(--pixel);transform:scale(1.02)}
+.mode-icon{font-size:16px}
+.mode-label{font-size:7px;font-family:'Press Start 2P',monospace;color:var(--pixel);font-weight:700}
+.mode-desc{font-size:6px;font-family:'Orbitron',monospace;color:var(--muted)}
+
+/* Challenge Lobby */
+.challenge-lobby{background:rgba(0,0,0,0.8);border:2px solid var(--pixel);border-radius:8px;padding:16px;margin:12px auto;max-width:700px;animation:fadeIn 0.3s}
+.challenge-lobby.hidden{display:none}
+@keyframes fadeIn{from{opacity:0;transform:scale(0.95)}to{opacity:1;transform:scale(1)}}
+.lobby-title{font-family:'Press Start 2P',monospace;font-size:11px;color:var(--pixel);margin-bottom:12px;text-shadow:0 0 10px var(--pixel)}
+.lobby-controls{display:flex;flex-wrap:wrap;gap:8px;justify-content:center;margin-bottom:12px}
+.lobby-btn{background:var(--pixel);color:#000;border:none;padding:8px 16px;font-family:'Press Start 2P',monospace;font-size:9px;cursor:pointer;border-radius:4px;transition:all 0.2s}
+.lobby-btn:hover{transform:scale(1.05);box-shadow:0 0 15px var(--pixel)}
+.lobby-btn:active{transform:scale(0.95)}
+
+.challenges-list-header{display:grid;grid-template-columns:80px 60px 60px 80px 80px;gap:8px;padding:8px;background:rgba(0,255,136,0.1);border-bottom:1px solid var(--border);font-family:'Press Start 2P',monospace;font-size:7px;color:var(--green);margin-bottom:8px}
+.challenges-list{max-height:300px;overflow-y:auto;display:flex;flex-direction:column;gap:4px}
+.challenge-room{display:grid;grid-template-columns:80px 60px 60px 80px 80px;gap:8px;padding:8px;background:var(--card);border:1px solid var(--border);border-radius:4px;align-items:center;font-size:8px;transition:all 0.2s;cursor:pointer}
+.challenge-room:hover{background:rgba(255,215,0,0.05);border-color:var(--pixel);transform:translateX(4px)}
+.room-id{font-family:'Press Start 2P',monospace;color:var(--pixel);font-weight:700}
+.room-level{color:var(--cyan)}
+.room-bet{color:var(--orange)}
+.room-players{color:var(--green);font-weight:700}
+.room-full{opacity:0.5;pointer-events:none;background:#5533ff33}
+.empty-msg{text-align:center;padding:20px;color:var(--muted);font-family:'Press Start 2P',monospace;font-size:8px}
+
+/* Weekly Challenge Panel */
+.weekly-info{display:grid;grid-template-columns:repeat(4,1fr);gap:12px;margin-bottom:16px}
+.weekly-stat{background:var(--card);border:1px solid var(--border);border-radius:6px;padding:12px;text-align:center}
+.stat-label{font-family:'Press Start 2P',monospace;font-size:7px;color:var(--muted);margin-bottom:4px}
+.stat-val{font-family:'Press Start 2P',monospace;font-size:12px;color:var(--pixel)}
+
+.weekly-leaderboard{background:rgba(0,0,0,0.5);border:1px solid var(--border);border-radius:6px;padding:12px;max-height:250px;overflow-y:auto}
+.leaderboard-header{font-family:'Press Start 2P',monospace;font-size:8px;color:var(--pixel);margin-bottom:8px;padding-bottom:8px;border-bottom:1px solid var(--border)}
+.leaderboard-list{display:flex;flex-direction:column;gap:4px}
+.leaderboard-header.clickable{cursor:pointer;user-select:none}
+.leaderboard-header.clickable:hover{color:var(--white)}
+.leaderboard-header.clickable.collapsed{color:var(--muted)}
+.leaderboard-list.collapsed{display:none}
+.leaderboard-entry{display:grid;grid-template-columns:30px 1fr 56px 72px 72px;gap:8px;padding:6px;background:var(--card);border-radius:4px;font-size:8px;align-items:center}
+.rank-badge{font-family:'Press Start 2P',monospace;font-weight:700;text-align:center}
+.rank-1{color:#FFD700}
+.rank-2{color:#C0C0C0}
+.rank-3{color:#CD7F32}
+.rank-other{color:var(--muted)}
+.player-name{font-family:'Orbitron',monospace;color:var(--white);overflow:hidden;text-overflow:ellipsis}
+.best-time{color:var(--cyan);text-align:right}
+.rank-position{color:var(--green);text-align:right}
+.week-bet{color:var(--orange);text-align:right}
+.week-winnings{color:var(--green);text-align:right;font-weight:700}
+
+.weekly-level-boards{display:grid;grid-template-columns:repeat(5,1fr);gap:8px;margin-bottom:10px}
+.weekly-level-chip{border:1px solid var(--border);background:var(--card);border-radius:6px;padding:8px;cursor:pointer;transition:all 0.2s;text-align:left}
+.weekly-level-chip:hover{border-color:var(--pixel);transform:translateY(-2px)}
+.weekly-level-chip.active{border-color:var(--pixel);box-shadow:0 0 10px rgba(255,215,0,0.3)}
+.weekly-level-chip .num{font-family:'Press Start 2P',monospace;font-size:8px;color:var(--pixel);margin-bottom:3px}
+.weekly-level-chip .meta{font-size:8px;color:var(--muted);display:flex;justify-content:space-between}
+.weekly-reward-info{border:1px dashed var(--border);border-radius:6px;padding:8px 10px;margin-bottom:10px;font-size:9px;color:var(--white);display:flex;justify-content:space-between;gap:8px;flex-wrap:wrap}
+
+.market-tabs{padding:16px 20px 0;display:flex;gap:8px}
+.market-tab{background:#0c0c22;border:1px solid var(--border);color:var(--muted);padding:8px 14px;font-family:'Press Start 2P',monospace;font-size:8px;cursor:pointer;border-radius:6px;transition:all 0.2s}
+.market-tab:hover{border-color:var(--cyan);color:var(--cyan)}
+.market-tab.active{border-color:var(--pixel);color:var(--pixel);box-shadow:0 0 12px rgba(255,215,0,0.25)}
+
+.market-layout{padding:20px;display:grid;grid-template-columns:1.3fr 1fr 1fr;gap:16px}
+.market-panel{background:var(--card);border:1px solid var(--border);border-radius:10px;padding:16px}
+.market-panel.hidden{display:none}
+.market-title{font-family:'Press Start 2P',monospace;font-size:11px;color:var(--pixel);margin-bottom:8px}
+.market-sub{font-size:10px;color:var(--muted);margin-bottom:12px}
+.market-listings,.market-inventory,.nft-progress{display:flex;flex-direction:column;gap:8px}
+.market-row{display:grid;grid-template-columns:1fr 80px 70px;gap:8px;align-items:center;background:#0c0c22;border:1px solid var(--border);border-radius:6px;padding:8px;font-size:10px}
+.market-row .material{font-weight:700}
+.market-row .rarity{font-size:9px;text-transform:uppercase;color:var(--cyan);text-align:right}
+.market-row .price{text-align:right;color:var(--green)}
+.rarity-common{color:#d9d9d9}
+.rarity-uncommon{color:#00ff88}
+.rarity-rare{color:#3399ff}
+.rarity-epic{color:#aa44ff}
+.rarity-legendary{color:#ff8800}
+.rarity-rarest{color:#ff3366;text-shadow:0 0 8px rgba(255,51,102,0.6)}
+.nft-req{display:flex;justify-content:space-between;font-size:10px;padding:6px 0;border-bottom:1px dashed var(--border)}
+.nft-req .ok{color:var(--green)}
+.nft-req .need{color:var(--red)}
+.trade-panel{grid-column:1 / -1}
+.trade-status{font-size:10px;color:var(--cyan);margin-bottom:10px}
+.trade-routes{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px}
+.trade-route{border:1px solid var(--border);border-radius:8px;background:#0c0c22;padding:12px}
+.trade-route-title{font-family:'Press Start 2P',monospace;font-size:8px;color:var(--white);margin-bottom:8px}
+.trade-route-meta{font-size:9px;color:var(--muted);margin-bottom:8px;line-height:1.6}
+.trade-route .lobby-btn{width:100%}
+
+.challenge-options{margin-top:12px;display:grid;grid-template-columns:1fr 1fr;gap:10px;justify-items:center}
+.challenge-options.hidden{display:none}
+.challenge-info{font-size:8px;color:var(--muted);grid-column:1 / -1;text-align:center}
+.start-btn{display:block;margin:14px auto 0;background:var(--pixel);color:#000;border:none;padding:12px 32px;font-family:'Press Start 2P',monospace;font-size:10px;cursor:pointer;border-radius:6px;transition:all 0.2s}
+.start-btn:hover{transform:scale(1.05);box-shadow:0 0 20px var(--pixel)}
+
+/* HUD */
+#gameHud{position:absolute;top:0;left:0;right:0;height:50px;background:rgba(0,0,0,0.85);border-bottom:2px solid var(--pixel);display:none;align-items:center;justify-content:space-between;padding:0 20px;z-index:30}
+.hud-item{display:flex;flex-direction:column;align-items:center}
+.hud-label{font-family:'Press Start 2P',monospace;font-size:7px;color:var(--muted)}
+.hud-val{font-family:'Press Start 2P',monospace;font-size:12px;color:var(--pixel)}
+.hud-val.red{color:var(--red)}.hud-val.green{color:var(--green)}
+.lives-hearts{font-size:14px;color:var(--red)}
+
+/* CANVAS */
+#gameCanvas{position:absolute;top:50px;left:0;right:0;bottom:0;display:none;width:100%;height:calc(100% - 50px)}
+
+/* Power bar */
+#powerBar{position:absolute;bottom:60px;left:20px;display:none;z-index:30}
+.pb-label{font-family:'Press Start 2P',monospace;font-size:7px;color:var(--cyan);margin-bottom:3px}
+.pb-track{width:120px;height:10px;background:#222;border-radius:5px;border:1px solid var(--cyan);overflow:hidden}
+.pb-fill{height:100%;background:linear-gradient(90deg,var(--cyan),var(--blue));border-radius:5px;transition:width 0.3s}
+
+/* Keys */
+#keysHint{position:absolute;bottom:12px;right:16px;display:none;z-index:30}
+.keys-row{display:flex;gap:4px;justify-content:flex-end;margin-bottom:3px;align-items:center}
+.key{background:var(--card);border:1px solid var(--border);border-radius:4px;padding:2px 6px;font-family:'Press Start 2P',monospace;font-size:7px;color:var(--muted)}
+.key-desc{font-size:9px;color:var(--muted);font-family:'Orbitron',monospace}
+.bonus-hint{font-size:9px;color:#FFD700;font-family:'Press Start 2P',monospace;margin-top:8px;border-top:1px solid var(--border);padding-top:8px;text-align:right}
+
+/* Game overlay */
+#gameOverlay{position:absolute;inset:0;background:rgba(0,0,0,0.9);display:none;flex-direction:column;align-items:center;justify-content:center;z-index:40}
+.ov-title{font-family:'Press Start 2P',monospace;font-size:22px;margin-bottom:16px;color:var(--green)}
+.ov-score{font-size:10px;font-family:'Press Start 2P',monospace;color:var(--muted);margin-bottom:8px}
+.ov-time{font-size:12px;font-family:'Press Start 2P',monospace;color:var(--pixel);margin-bottom:24px}
+.ov-btns{display:flex;gap:12px}
+.ov-btn{background:var(--card);border:2px solid var(--border);color:var(--white);padding:10px 24px;font-family:'Press Start 2P',monospace;font-size:8px;cursor:pointer;border-radius:6px;transition:all 0.2s}
+.ov-btn:hover{border-color:var(--pixel);color:var(--pixel)}
+.ov-btn.primary{background:var(--pixel);color:#000;border-color:var(--pixel)}
+.scoreboard{max-height:300px;overflow-y:auto;margin:16px 0;padding:16px;background:rgba(255,255,255,0.05);border:1px solid var(--border);border-radius:8px;min-width:400px}
+.scoreboard.hidden{display:none}
+.scoreboard-title{font-family:'Press Start 2P',monospace;font-size:12px;color:var(--pixel);margin-bottom:12px;text-align:center}
+.scores-list{display:flex;flex-direction:column;gap:8px}
+.score-row{display:grid;grid-template-columns:40px 1fr 80px 80px 100px;gap:12px;align-items:center;padding:10px;background:rgba(255,255,255,0.02);border:1px solid rgba(255,255,255,0.1);border-radius:6px;font-size:10px}
+.score-row.winner{background:rgba(255,215,0,0.15);border-color:var(--pixel);color:var(--pixel);font-weight:700}
+.score-rank{font-family:'Press Start 2P',monospace;font-size:10px;text-align:center;color:var(--muted);width:30px}
+.score-rank.rank-1{color:#FFD700}.score-rank.rank-2{color:#C0C0C0}.score-rank.rank-3{color:#CD7F32}
+.score-player{font-size:10px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.score-time{font-family:'Press Start 2P',monospace;font-size:9px;text-align:center;color:var(--cyan)}
+.score-bet{font-family:'Press Start 2P',monospace;font-size:9px;text-align:center;color:var(--orange)}
+.score-winnings{font-family:'Press Start 2P',monospace;font-size:9px;text-align:right;font-weight:700;color:var(--green)}
+
+/* Effects */
+.coin-pop{position:absolute;font-family:'Press Start 2P',monospace;font-size:10px;color:var(--pixel);pointer-events:none;z-index:50;animation:coinPop 1s ease-out forwards}
+@keyframes coinPop{0%{opacity:1;transform:translateY(0)}100%{opacity:0;transform:translateY(-40px)}}
+
+/* DASHBOARD */
+#dashPage{padding:20px;overflow:auto}
+.dash-grid{display:grid;grid-template-columns:1fr 1fr 1fr;gap:16px;margin-bottom:20px}
+.stat-card{background:var(--card);border:1px solid var(--border);border-radius:10px;padding:16px;position:relative;overflow:hidden}
+.stat-card::before{content:'';position:absolute;top:0;left:0;right:0;height:3px}
+.stat-card.gold::before{background:var(--pixel)}
+.stat-card.green::before{background:var(--green)}
+.stat-card.blue::before{background:var(--blue)}
+.stat-label{font-size:9px;color:var(--muted);margin-bottom:8px;text-transform:uppercase;letter-spacing:1px}
+.stat-val{font-size:24px;font-weight:900;color:var(--white)}
+.stat-sub{font-size:9px;color:var(--muted);margin-top:4px}
+.leaderboard{background:var(--card);border:1px solid var(--border);border-radius:10px;padding:20px}
+.lb-title{font-size:11px;color:var(--muted);text-transform:uppercase;letter-spacing:2px;margin-bottom:16px;display:flex;align-items:center;gap:8px}
+.lb-title::after{content:'';flex:1;height:1px;background:var(--border)}
+.lb-row{display:grid;grid-template-columns:30px 1fr 80px 80px 70px 90px;gap:8px;align-items:center;padding:10px 8px;border-radius:8px;margin-bottom:4px;font-size:11px;transition:background 0.2s}
+.lb-row:hover{background:rgba(255,215,0,0.05)}
+.lb-row.winner-row{background:rgba(255,215,0,0.1);border-left:3px solid var(--pixel)}
+.lb-row.header{color:var(--muted);font-size:9px;text-transform:uppercase;letter-spacing:1px;border-bottom:1px solid var(--border);margin-bottom:8px;padding-bottom:8px}
+.lb-rank{font-family:'Press Start 2P',monospace;font-size:10px;color:var(--muted);text-align:center}
+.lb-rank.r1{color:#FFD700}.lb-rank.r2{color:#C0C0C0}.lb-rank.r3{color:#CD7F32}
+.lb-avatar{width:28px;height:28px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-family:'Press Start 2P',monospace;font-size:8px;flex-shrink:0}
+.lb-name-wrap{display:flex;align-items:center;gap:8px}
+.lb-name{font-weight:700;font-size:11px}
+.lb-tag{font-size:7px;padding:2px 5px;border-radius:3px;font-family:'Press Start 2P',monospace}
+.tag-legend{background:#FFD70022;color:#FFD700;border:1px solid #FFD700}
+.tag-hero{background:#3399ff22;color:#3399ff;border:1px solid #3399ff}
+.tag-warrior{background:#aa44ff22;color:#aa44ff;border:1px solid #aa44ff}
+.tag-novice{background:#00ff8822;color:#00ff88;border:1px solid #00ff88}
+.tag-master{background:#ff336622;color:#ff3366;border:1px solid #ff3366}
+.lb-exp{color:var(--pixel);font-weight:700}
+.lb-time{color:var(--cyan)}
+.exp-bar-wrap{display:flex;align-items:center;gap:6px}
+.exp-bar{height:5px;border-radius:3px;flex:1;background:#222;overflow:hidden;min-width:60px}
+.exp-fill{height:100%;border-radius:3px;background:linear-gradient(90deg,var(--pixel),var(--orange))}
+.exp-pct{font-size:9px;color:var(--muted);min-width:28px;text-align:right}
+.live-section{background:var(--card);border:1px solid var(--border);border-radius:10px;padding:20px;margin-top:16px}
+.live-title{font-size:11px;color:var(--muted);text-transform:uppercase;letter-spacing:2px;margin-bottom:12px;display:flex;align-items:center;gap:8px}
+.live-badge{background:var(--red);color:var(--white);font-size:8px;padding:2px 6px;border-radius:3px;font-family:'Press Start 2P',monospace;animation:pulse 1s infinite}
+.live-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:12px}
+.live-card{background:#0a0a1a;border:1px solid var(--border);border-radius:8px;padding:12px}
+.live-player{font-size:11px;font-weight:700;margin-bottom:4px}
+.live-info{font-size:9px;color:var(--muted)}
+.live-prog{height:4px;border-radius:2px;background:#222;margin-top:8px;overflow:hidden}
+.live-prog-fill{height:100%;border-radius:2px;background:var(--green)}
+
+/* CONTRACTS */
+#contractsPage{padding:20px;overflow:auto}
+.contract-header{margin-bottom:24px}
+.contract-title{font-family:'Press Start 2P',monospace;font-size:14px;color:var(--pixel);margin-bottom:8px}
+.contract-sub{font-size:11px;color:var(--muted)}
+.contracts-grid{display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-bottom:20px}
+.contract-card{background:var(--card);border:1px solid var(--border);border-radius:10px;padding:20px}
+.cc-name{font-size:12px;font-weight:700;color:var(--white);margin-bottom:4px}
+.cc-addr{font-size:9px;color:var(--cyan);font-family:monospace;margin-bottom:12px}
+.cc-desc{font-size:10px;color:var(--muted);line-height:1.6;margin-bottom:12px}
+.chain-badge{padding:3px 8px;border-radius:4px;font-size:8px}
+.chain-evm{background:#8000ff22;color:#aa88ff;border:1px solid #aa88ff}
+.chain-0g{background:#00aaff22;color:#44ccff;border:1px solid #44ccff}
+.full-contract{background:var(--card);border:1px solid var(--border);border-radius:10px;padding:20px;margin-bottom:20px}
+.fc-title{font-size:12px;color:var(--muted);text-transform:uppercase;letter-spacing:1px;margin-bottom:12px;display:flex;align-items:center;justify-content:space-between}
+.copy-btn{background:var(--border);border:none;color:var(--white);padding:4px 12px;font-family:'Orbitron',monospace;font-size:9px;border-radius:4px;cursor:pointer;text-decoration:none;display:inline-block}
+.copy-btn:hover{background:var(--pixel);color:#000}
+.code-block{background:#05050f;border:1px solid var(--border);border-radius:8px;padding:16px;font-family:monospace;font-size:11px;color:#ccc;overflow-x:auto;line-height:1.8;max-height:300px;overflow-y:auto}
+.code-block code{color:var(--cyan)}
+
+::-webkit-scrollbar{width:4px;height:4px}
+::-webkit-scrollbar-track{background:var(--bg)}
+::-webkit-scrollbar-thumb{background:var(--border);border-radius:2px}
+::-webkit-scrollbar-thumb:hover{background:var(--pixel)}
